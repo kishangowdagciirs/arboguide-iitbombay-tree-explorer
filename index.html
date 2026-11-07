@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173f32">
+<title>ArboGuide | IIT Bombay Campus Tree Explorer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<style>
+:root{--green:#173f32;--leaf:#2d7555;--mint:#eaf4ed;--ink:#1c2b24;--muted:#65756c;--line:#e0e8e1}
+*{box-sizing:border-box}body{margin:0;background:#fbfcfa;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:linear-gradient(120deg,#123a2c,#2c7051);color:white;padding:22px 18px}
+header>div,main,footer{max-width:1400px;margin:auto}.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.8;font-weight:800}
+h1{font-size:clamp(26px,5vw,38px);margin:7px 0;letter-spacing:-.04em}header p{margin:0;color:#dcebe0;font-size:14px}
+main{padding:16px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.8fr);gap:16px}
+.panel{background:white;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 5px 20px #193b2510;min-width:0}
+.head{padding:14px 16px;display:flex;justify-content:space-between;border-bottom:1px solid var(--line);gap:10px;align-items:center}.head h2{font-size:15px;margin:0}
+.small{font-size:12px;color:var(--muted)}#map{height:590px;background:#eaf0e7}
+.controls,.filters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 14px}
+button,select{font:inherit;border:0;border-radius:11px;padding:10px 13px;background:var(--green);color:white;font-weight:750;cursor:pointer}
+button.secondary{background:var(--mint);color:var(--green);border:1px solid #d2e4d7}button:disabled{opacity:.5;cursor:default}
+select,input,textarea{font:inherit;border:1px solid #d7e2d8;border-radius:11px;padding:10px 11px;background:white;color:var(--ink);width:100%}
+.status{margin:0 14px 12px;padding:11px 12px;background:#f3f7f3;border:1px solid var(--line);border-radius:11px;font-size:12px;line-height:1.5;color:#43574b}.status strong{color:var(--green)}
+.search{padding:12px 14px;border-bottom:1px solid var(--line)}#treeList{max-height:490px;overflow:auto}
+.tree{padding:11px 13px;display:flex;gap:11px;border-bottom:1px solid #edf1ed;cursor:pointer}.tree:hover{background:#f6faf6}
+.thumb{width:62px;height:72px;border-radius:10px;background:#e8f0e8;object-fit:cover;flex-shrink:0}
+.info{min-width:0}.info h3{font-size:14px;margin:2px 0 4px}.bot{font-size:12px;color:var(--muted);font-style:italic;overflow-wrap:anywhere}
+.meta{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+#alert{display:none;margin:12px 14px 14px;padding:12px;border:1px solid #b6d9bf;background:#eef8f0;border-radius:14px;gap:12px;align-items:center}
+#alert.show{display:flex}#alert img{width:76px;height:84px;object-fit:cover;border-radius:10px;background:#dfeade}
+#alert h3{margin:0 0 3px;font-size:17px}#alert p{font-size:12px;margin:6px 0;color:#43574b}
+footer{padding:0 16px 24px;color:var(--muted);font-size:11px;line-height:1.6;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;gap:5px}.copyright{margin-left:0;text-align:left;white-space:nowrap;font-weight:750;color:var(--green)}
+.tree-marker{background:#176b45;border:2.5px solid #fff;border-radius:50%;box-shadow:0 2px 7px #0008;width:17px;height:17px}
+#treeCardBackdrop,#reportBackdrop{display:none;position:fixed;inset:0;z-index:2000;background:#071b14b8;backdrop-filter:blur(4px);padding:16px;align-items:center;justify-content:center}
+#treeCardBackdrop.show,#reportBackdrop.show{display:flex}
+.tree-card,.report-card{width:min(590px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:20px;box-shadow:0 20px 70px #0006;position:relative}
+.tree-card-top,.report-top{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}
+.tree-card-top strong,.report-top strong{color:var(--green);font-size:13px;letter-spacing:.04em}
+.close{width:36px;height:36px;padding:0;border-radius:50%;background:#edf4ee;color:var(--green);font-size:22px;line-height:1}
+.tree-card-photo{width:100%;height:260px;object-fit:cover;background:#eaf1e9;display:block}
+.tree-card-content,.report-content{padding:18px}
+.tree-card-content h2{margin:0 0 5px;font-size:25px;color:var(--ink)}.tree-card-bot{font-style:italic;color:var(--muted);margin-bottom:14px}
+.tree-card-id{display:inline-block;background:var(--mint);color:var(--green);font-size:12px;font-weight:750;padding:5px 9px;border-radius:20px;margin-bottom:14px}
+.tree-attributes{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;border-top:1px solid var(--line)}
+.tree-attribute{padding:11px 0;border-bottom:1px solid #edf1ed;min-width:0}
+.tree-attribute span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.tree-attribute b{display:block;font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.tree-card-coords{font-size:11px;color:var(--muted);margin-top:14px}
+.field{margin-bottom:13px}.field label{display:block;font-size:12px;font-weight:750;color:#43574b;margin-bottom:6px}
+.field textarea{min-height:95px;resize:vertical}.hint{font-size:11px;color:var(--muted);line-height:1.5}
+.demo-note{padding:10px 12px;background:#fff8e8;border:1px solid #f0dfb4;border-radius:10px;color:#71551c;font-size:11px;line-height:1.5;margin-bottom:14px}
+#reportResult{display:none;margin-top:12px;padding:12px;border-radius:10px;background:#eef8f0;border:1px solid #b6d9bf;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+#reportBtn{position:fixed;right:0;top:48%;z-index:1500;writing-mode:vertical-rl;transform:rotate(180deg);border-radius:0 12px 12px 0;padding:16px 11px;box-shadow:0 4px 16px #0003;letter-spacing:.02em}
+#reportBtn span{display:inline-flex;align-items:center;gap:8px}#reportBtn .flag{font-size:17px}
+#locationReportHint{display:none;position:fixed;z-index:1490;right:62px;top:44%;width:min(310px,calc(100vw - 100px));padding:12px 14px;background:#fffdf2;border:1px solid #e6c86e;border-radius:13px;box-shadow:0 5px 22px #0002;color:#34463a;font-size:12px;line-height:1.45}
+#locationReportHint.show{display:block;animation:hintPulse 1.8s ease-in-out 2}
+#locationReportHint:after{content:"";position:absolute;right:-9px;top:50%;width:15px;height:15px;background:#fffdf2;border-top:1px solid #e6c86e;border-right:1px solid #e6c86e;transform:translateY(-50%) rotate(45deg)}
+#locationReportHint .hint-arrow{display:inline-block;font-size:20px;font-weight:900;color:#176b45;margin-left:5px;animation:hintNudge .8s ease-in-out infinite alternate}
+@keyframes hintNudge{from{transform:translateX(0)}to{transform:translateX(6px)}}
+@keyframes hintPulse{0%,100%{box-shadow:0 5px 22px #0002}50%{box-shadow:0 5px 22px #d8a92888}}
+@media(max-width:520px){#locationReportHint{top:auto;bottom:24%;left:12px;right:76px;width:auto;max-width:300px}#locationReportHint:after{right:-9px;left:auto;top:50%;bottom:auto;transform:translateY(-50%) rotate(45deg)}}
+
+.leaflet-popup-content{line-height:1.5}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:10px;gap:12px}header{padding:19px 16px}#map{height:48vh;min-height:340px;max-height:560px}#treeList{max-height:360px}}
+@media(max-width:520px){#reportBtn{top:auto;bottom:24%;right:8px;left:auto;transform:none;writing-mode:vertical-rl;border-radius:12px;padding:14px 9px;z-index:1500}
+#reportBtn span{flex-direction:row}.tree-card,.report-card{max-height:94vh;border-radius:16px}.tree-card-photo{height:220px}
+.tree-card-content,.report-content{padding:15px}.report-content{padding-bottom:120px}.tree-attributes{grid-template-columns:1fr 1fr;gap:0 12px}}
+</style>
+</head>
+<body>
+<header><div><div class="eyebrow">IIT Bombay · Campus Tree Explorer</div><h1>ArboGuide</h1><p>Walk closer to unlock the tree’s story.</p></div></header>
+<main>
+<section class="panel">
+  <div class="head"><h2>Tree map</h2><span class="small" id="mapCaption">Loading inventory…</span></div>
+  <div id="map"></div>
+  <div class="controls">
+    <button id="locate">◎ Find my location</button><button id="stop" class="secondary" disabled>Stop GPS</button><button id="all" class="secondary">Show all trees</button>
+  </div>
+  <div id="status" class="status"><strong>Loading campus inventory.</strong> Please wait.</div>
+  <div id="alert"><img id="alertImg" alt="Tree photo"><div><div class="eyebrow" style="color:#39734f;opacity:1">Nearby tree detected</div><h3 id="alertName"></h3><div class="bot" id="alertBot"></div><p id="alertDist"></p><div style="display:flex;gap:7px;flex-wrap:wrap"><button id="viewNearby" style="padding:7px 10px">View details</button><button id="dismiss" class="secondary" style="padding:7px 10px">Dismiss</button></div></div></div>
+</section>
+<section class="panel">
+  <div class="head"><h2>Tree directory</h2><span class="small" id="listCount">0 records</span></div>
+  <div class="search"><input id="q" type="search" placeholder="Search physical Tree Tag ID, name, species or family…"></div>
+  <div class="filters"><select id="areaFilter" aria-label="Filter by campus area"><option value="">All campus areas</option></select></div>
+  <div id="treeList"></div>
+</section>
+</main>
+<footer><span>GPS-based tree identification. Device GPS accuracy may vary and can affect results. Please wait for GPS to stabilise.</span><span class="copyright">©KISHAN GOWDA G C</span></footer>
+
+<button id="reportBtn" type="button" aria-label="Report a problem"><span><b class="flag">⚑</b> Report a problem</span></button>
+<div id="locationReportHint" role="status" aria-live="polite">
+  <b>Help us keep ArboGuide accurate.</b><br>
+  If you notice an incorrect tree name or a tree shown in the wrong location, please submit a report using the <b>Report a problem</b> side button.
+  <span class="hint-arrow" aria-hidden="true">➜</span>
+</div>
+
+<div id="treeCardBackdrop" role="dialog" aria-modal="true" aria-labelledby="treeCardName">
+  <article class="tree-card">
+    <div class="tree-card-top"><strong>TREE PROFILE</strong><button class="close" id="treeCardClose" aria-label="Close tree profile">×</button></div>
+    <img id="treeCardPhoto" class="tree-card-photo" alt="Tree photograph">
+    <div class="tree-card-content"><h2 id="treeCardName"></h2><div id="treeCardBot" class="tree-card-bot"></div>
+      <div id="treeCardId" class="tree-card-id"></div><div id="treeCardAttributes" class="tree-attributes"></div><div id="treeCardCoords" class="tree-card-coords"></div>
+    </div>
+  </article>
+</div>
+
+<iframe id="arboReportFrame" name="arboReportFrame" title="Report submission" style="display:none;width:0;height:0;border:0"></iframe>
+
+<div id="reportBackdrop" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <article class="report-card">
+    <div class="report-top"><strong id="reportTitle">REPORT A PROBLEM</strong><button class="close" id="reportClose" aria-label="Close report form">×</button></div>
+    <div class="report-content">
+      <div class="demo-note"><b>Private reporting:</b> Your report and any evidence photograph will be sent to the ArboGuide review register. The master tree inventory remains read-only for visitors.</div>
+      <form id="reportForm">
+        <div class="field"><label for="reportTag">Physical Tree Tag ID</label><input id="reportTag" name="tag_id" placeholder="e.g. H4603"></div>
+        <div class="field">
+          <label for="reportLocation">Your current GPS location <span style="color:#b42318">*</span></label>
+          <input id="reportLocation" type="text" value="Waiting for GPS location…" readonly required>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:7px;flex-wrap:wrap">
+            <button type="button" class="secondary" id="getReportGPS">Get GPS location</button>
+            <span class="hint" id="reportGPSStatus">Location is mandatory to submit a report.</span>
+          </div>
+        </div>
+        <div class="field"><label for="reportCategory">Problem category *</label><select id="reportCategory" name="category" required><option value="">Select a category</option><option>Incorrect tree information</option><option>Incorrect tree location</option><option>Wrong or missing photograph</option><option>Tree not found / tag missing</option><option>Tree condition or status update</option><option>Map or website problem</option><option>Other suggestion</option></select></div>
+        <div class="field"><label for="reportAttribute">Attribute concerned (optional)</label><select id="reportAttribute" name="attribute"><option value="">Not applicable</option><option>Common name</option><option>Botanical name</option><option>Family</option><option>Height</option><option>Girth</option><option>Canopy</option><option>Condition</option><option>Locality</option><option>Coordinates</option><option>Photograph</option><option>Other</option></select></div>
+        <div class="field"><label for="reportSuggestion">Suggested correction (optional)</label><input id="reportSuggestion" name="suggestion" placeholder="Enter the correct value"></div>
+        <div class="field"><label for="reportDescription">Describe the problem *</label><textarea id="reportDescription" name="description" required placeholder="Explain what you observed…"></textarea></div>
+        <div class="field">
+          <label for="reportEvidence">Evidence photograph <span id="photoRequiredMark">(optional)</span></label>
+          <input id="reportEvidence" type="file" accept="image/*" capture="environment">
+          <div class="hint" id="photoGuidance">If possible, take a fresh photograph of the actual tree using your phone camera. Enable location tagging/geotagging in your camera settings before taking the picture. The report separately records your live GPS location.</div>
+        </div>
+        <div class="field"><label for="reportContact">Your contact (optional)</label><input id="reportContact" name="contact" placeholder="Name or email"></div>
+        <button type="submit" id="reportSubmitBtn">Submit report</button>
+      </form>
+      <div id="reportResult" role="status"></div>
+    </div>
+  </article>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+'use strict';
+const R=7;
+const DATA_URL='web_data/trees.json';
+const PHOTO_BASE='https://pub-62f7d5cd03d945898b72e964bea8ba61.r2.dev/';
+// Paste your deployed Google Apps Script Web App URL here after setup.
+const REPORT_ENDPOINT='https://script.google.com/macros/s/AKfycbxUNcKYbjRzPH0thHkkl2ZWXB0W-ZzjYIq9FbE4ZDQvM8lOt0B7GPToXNoCQnE7NrmGDA/exec';
+const MAX_EVIDENCE_BYTES=5*1024*1024;
+let trees=[],clusterLayer=null,markerByRecord=new Map(),markerEntries=[],watch=null,user=null,accCircle=null,pos=null,inside=new Set(),alerted=new Set(),selectedTree=null,reportGPS=null,reportGPSBusy=false;
+const $=id=>document.getElementById(id);
+const map=L.map('map').setView([19.1358,72.9095],15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:21,attribution:'© OpenStreetMap contributors'}).addTo(map);
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function n(v){return v!==null&&v!==''&&Number.isFinite(Number(v))?Number(v):null}
+function valid(t){return n(t.latitude)!==null&&n(t.longitude)!==null&&Math.abs(+t.latitude)<=90&&Math.abs(+t.longitude)<=180}
+function tag(t){return String(t.no??'').trim()||'Tag unavailable'}
+function recordKey(t){return String(t.tree_id??t.record_id??tag(t))}
+function photo(t){return t.img?PHOTO_BASE+encodeURIComponent(String(t.img).split(/[\\/]/).pop()):''}
+function distance(a,b,c,d){const rad=x=>x*Math.PI/180,p1=rad(a),p2=rad(c),dp=rad(c-a),dl=rad(d-b),h=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 12742000*Math.asin(Math.sqrt(h))}
+function dist(t){return pos?distance(pos.latitude,pos.longitude,+t.latitude,+t.longitude):Infinity}
+function labelKey(k){const aliases={can:'Canopy',gth:'Girth (m)',ht:'Height (m)',fam:'Family',cond:'Condition',addr:'Locality',bot:'Botanical name',name:'Common name',age:'Age',own:'Ownership',species:'Species'};return aliases[String(k).toLowerCase()]||String(k).replace(/([A-Z])/g,' $1').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim().replace(/\b\w/g,c=>c.toUpperCase())}
+function openTree(t){const marker=markerByRecord.get(recordKey(t));if(marker){map.setView([+t.latitude,+t.longitude],Math.max(18,map.getZoom()));clusterLayer.zoomToShowLayer(marker,()=>marker.openPopup())}}
+function showTreeCard(t){
+  selectedTree=t;$('treeCardName').textContent=t.name||'Tree name unavailable';$('treeCardBot').textContent=t.bot||'Botanical name unavailable';
+  $('treeCardId').textContent='Physical Tree Tag ID: '+tag(t);
+  const img=$('treeCardPhoto');img.style.display=t.img?'block':'none';img.onerror=()=>{img.style.display='none'};img.src=t.img?photo(t):'';
+  const skip=new Set(['img','photo','image','image_url','photo_url','latitude','longitude','lat','lon','lng','no','tree_id','tag_id','record_id','photo_filename']);
+  const entries=Object.entries(t).filter(([k,v])=>!skip.has(String(k).toLowerCase())&&v!==null&&v!==undefined&&String(v).trim()!=='');
+  $('treeCardAttributes').innerHTML=entries.map(([k,v])=>`<div class="tree-attribute"><span>${esc(labelKey(k))}</span><b>${esc(v)}</b></div>`).join('');
+  const lat=n(t.latitude),lon=n(t.longitude);$('treeCardCoords').textContent=lat!==null&&lon!==null?`Coordinates: ${lat.toFixed(6)}, ${lon.toFixed(6)}`:'';
+  $('treeCardBackdrop').classList.add('show');
+}
+function closeTreeCard(){$('treeCardBackdrop').classList.remove('show')}
+$('treeCardClose').onclick=closeTreeCard;$('treeCardBackdrop').addEventListener('click',e=>{if(e.target===$('treeCardBackdrop'))closeTreeCard()});
+function render(){
+  const q=$('q').value.trim().toLowerCase(),area=$('areaFilter').value;
+  let a=trees.filter(t=>{
+    const searchable=[t.no,t.name,t.bot,t.fam,t.species,t.addr,t.tree_id].join(' ').toLowerCase();
+    return (!q||searchable.includes(q))&&(!area||String(t.addr||'')===area);
+  });
+  if(pos)a.sort((x,y)=>dist(x)-dist(y));
+  $('listCount').textContent=`${a.length.toLocaleString()} matching trees`;
+  $('treeList').innerHTML=a.slice(0,300).map(t=>`<div class="tree" data-record="${esc(recordKey(t))}">
+    ${t.img?`<img class="thumb" src="${esc(photo(t))}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`:`<div class="thumb"></div>`}
+    <div class="info"><h3>${esc(t.name||'Name unavailable')}</h3><div class="bot">${esc(t.bot||'Botanical name unavailable')}</div>
+    <div class="meta"><b>Tag ${esc(tag(t))}</b> · ${esc(t.fam||'Family unavailable')}<br>${esc(t.addr||'Area unavailable')}${pos?' · '+Math.round(dist(t))+' m':''}</div></div></div>`).join('');
+  $('treeList').querySelectorAll('.tree').forEach(e=>e.onclick=()=>{const t=trees.find(x=>recordKey(x)===e.dataset.record);if(t){openTree(t);showTreeCard(t)}});
+}
+function popup(t){return `<b>${esc(t.name||'Tree name unavailable')}</b><br><i>${esc(t.bot||'Botanical name unavailable')}</i><br><small>Tree Tag ID: ${esc(tag(t))}</small>`}
+function addMarkers(){
+  clusterLayer=L.markerClusterGroup({chunkedLoading:true,chunkInterval:150,chunkDelay:25,maxClusterRadius:55,spiderfyOnMaxZoom:true,showCoverageOnHover:false,zoomToBoundsOnClick:true});
+  const validTrees=trees.filter(valid),bounds=[];
+  validTrees.forEach(t=>{
+    const marker=L.circleMarker([+t.latitude,+t.longitude],{radius:6,color:'#fff',weight:1.5,fillColor:'#087443',fillOpacity:1});
+    marker.bindPopup(popup(t));marker.on('click',()=>showTreeCard(t));
+    markerByRecord.set(recordKey(t),marker);markerEntries.push({t,marker});bounds.push([+t.latitude,+t.longitude]);
+  });
+  // Bulk add enables MarkerCluster's chunked loading for a large inventory.
+  clusterLayer.addLayers(markerEntries.map(x=>x.marker));
+  map.addLayer(clusterLayer);
+  if(bounds.length)map.fitBounds(L.latLngBounds(bounds),{padding:[30,30],maxZoom:18});
+  $('mapCaption').textContent=`${validTrees.length.toLocaleString()} tree points · clustered`;
+  requestAnimationFrame(()=>map.invalidateSize());
+}
+function fillAreas(){
+  const areas=[...new Set(trees.map(t=>String(t.addr||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  areas.forEach(area=>{const o=document.createElement('option');o.value=area;o.textContent=area;$('areaFilter').appendChild(o)});
+}
+function popupNearby(t,d){
+  $('alertDist').dataset.record=recordKey(t);$('alertName').textContent=t.name||'Tree name unavailable';$('alertBot').textContent=t.bot||'Botanical name unavailable';
+  $('alertDist').textContent=`${d.toFixed(1)} m from recorded coordinate · Tag ${tag(t)}`;
+  const im=$('alertImg');im.style.visibility='visible';im.src=t.img?photo(t):'';im.onerror=()=>im.style.visibility='hidden';im.style.display=t.img?'block':'none';$('alert').classList.add('show');
+}
+function update(p){
+  pos={latitude:p.coords.latitude,longitude:p.coords.longitude};const acc=p.coords.accuracy||0,xy=[pos.latitude,pos.longitude];
+  if(user)user.setLatLng(xy);else user=L.circleMarker(xy,{radius:8,color:'#fff',weight:3,fillColor:'#2477e5',fillOpacity:1}).addTo(map).bindPopup('Your location');
+  if(accCircle)accCircle.setLatLng(xy).setRadius(Math.min(acc,200));else accCircle=L.circle(xy,{radius:Math.min(acc,200),color:'#2477e5',weight:1,fillColor:'#4c9bff',fillOpacity:.09,dashArray:'4 5'}).addTo(map);
+  let nearest=trees.filter(valid).map(t=>({t,d:dist(t)})).sort((a,b)=>a.d-b.d)[0];
+  let msg=`GPS accuracy approximately ±${Math.round(acc)} m.`;if(nearest)msg+=` Nearest mapped tree: ${nearest.t.name||'Unknown'} (${Math.round(nearest.d)} m).`;
+  if(acc>7)msg+=' Accuracy uncertainty exceeds the 7 m trigger, so proximity alerts may be unreliable.';
+  $('status').innerHTML='<strong>GPS active.</strong> '+esc(msg);
+  const now=new Set(trees.filter(valid).filter(t=>dist(t)<=R).map(recordKey));
+  const entered=[...now].filter(id=>!inside.has(id)).map(id=>trees.find(t=>recordKey(t)===id)).filter(Boolean).sort((a,b)=>dist(a)-dist(b));
+  inside=now;const fresh=entered.find(t=>!alerted.has(recordKey(t)));if(fresh){popupNearby(fresh,dist(fresh));alerted.add(recordKey(fresh))}
+  render();
+}
+function start(){
+  if(!navigator.geolocation){$('status').textContent='Geolocation is not supported by this browser.';return}
+  if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){$('status').innerHTML='<strong>HTTPS required.</strong> Open on localhost or deploy over HTTPS to use GPS.';return}
+  $('locate').disabled=true;$('status').innerHTML='<strong>Requesting GPS…</strong> Allow location access when prompted.';
+  watch=navigator.geolocation.watchPosition(p=>{update(p);$('locate').disabled=false;$('stop').disabled=false},e=>{$('status').innerHTML='<strong>Could not get location.</strong> '+esc(({1:'Permission denied. Allow location in browser settings.',2:'Position unavailable. Try outdoors.',3:'Request timed out. Try again.'})[e.code]||e.message);$('locate').disabled=false},{enableHighAccuracy:true,maximumAge:1500,timeout:20000});
+  $('stop').disabled=false;
+}
+function stop(){if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;$('locate').disabled=false;$('stop').disabled=true;$('status').innerHTML='<strong>GPS stopped.</strong> Location is no longer being watched.'}
+function showLocationReportHint(){
+  const hint=$('locationReportHint');
+  hint.classList.add('show');
+}
+$('locate').onclick=()=>{showLocationReportHint();start()};
+$('reportBtn').addEventListener('click',()=>{$('locationReportHint').classList.remove('show')});
+$('stop').onclick=stop;
+$('all').onclick=()=>{const a=trees.filter(valid);if(a.length)map.fitBounds(L.latLngBounds(a.map(t=>[+t.latitude,+t.longitude])),{padding:[25,25],maxZoom:18})};
+$('q').oninput=render;
+$('areaFilter').onchange=()=>{
+  render();
+  if(clusterLayer){
+    const area=$('areaFilter').value;
+    const visible=markerEntries.filter(x=>!area||String(x.t.addr||'')===area);
+    clusterLayer.clearLayers();
+    clusterLayer.addLayers(visible.map(x=>x.marker));
+    $('mapCaption').textContent=`${visible.length.toLocaleString()} tree points · ${area?esc(area):'all areas'} · clustered`;
+    if(visible.length)map.fitBounds(L.latLngBounds(visible.map(x=>[+x.t.latitude,+x.t.longitude])),{padding:[25,25],maxZoom:18});
+  }
+};
+$('dismiss').onclick=()=>$('alert').classList.remove('show');
+$('viewNearby').onclick=()=>{const t=trees.find(x=>recordKey(x)===$('alertDist').dataset.record);if(t)showTreeCard(t)};
+function findReportedTree(){
+  const id=$('reportTag').value.trim().toLowerCase();
+  return id?trees.find(t=>String(t.no??'').trim().toLowerCase()===id):null;
+}
+function updatePhotoRequirement(){
+  const tree=findReportedTree();
+  const category=$('reportCategory').value;
+  const mustHavePhoto=!tree || !tree.img || category==='Wrong or missing photograph';
+  $('reportEvidence').required=mustHavePhoto;
+  $('photoRequiredMark').textContent=mustHavePhoto?'(required)':'(optional)';
+  $('photoGuidance').textContent=mustHavePhoto
+    ?'A photograph is required because this tree has no linked photograph in the inventory, or the report concerns a missing/wrong photograph. If possible, use your phone camera with location tagging/geotagging enabled. The report also records live GPS separately.'
+    :'If possible, take a fresh photograph of the actual tree using your phone camera. Enable location tagging/geotagging in your camera settings. The report separately records your live GPS location.';
+}
+function requestReportGPS(){
+  if(!navigator.geolocation){
+    reportGPS=null;$('reportLocation').value='GPS is not supported by this browser.';
+    $('reportGPSStatus').textContent='GPS is required; this browser cannot provide it.';return;
+  }
+  if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){
+    reportGPS=null;$('reportLocation').value='Secure connection required.';
+    $('reportGPSStatus').textContent='Open this page on HTTPS or localhost to capture GPS.';return;
+  }
+  reportGPSBusy=true;$('getReportGPS').disabled=true;
+  $('reportLocation').value='Requesting current GPS location…';
+  $('reportGPSStatus').textContent='Allow location access when your browser asks.';
+  navigator.geolocation.getCurrentPosition(
+    p=>{
+      reportGPS={latitude:p.coords.latitude,longitude:p.coords.longitude,accuracy_m:p.coords.accuracy||null,captured_at:new Date().toISOString()};
+      $('reportLocation').value=`${reportGPS.latitude.toFixed(6)}, ${reportGPS.longitude.toFixed(6)}`;
+      $('reportGPSStatus').textContent=`GPS captured · accuracy ±${Math.round(reportGPS.accuracy_m||0)} m`;
+      reportGPSBusy=false;$('getReportGPS').disabled=false;
+    },
+    err=>{
+      reportGPS=null;$('reportLocation').value='Location not captured — retry required.';
+      $('reportGPSStatus').textContent=({1:'Permission denied. Allow location access and retry.',2:'Position unavailable. Move outdoors and retry.',3:'GPS request timed out. Retry.'})[err.code]||'Unable to get GPS. Retry.';
+      reportGPSBusy=false;$('getReportGPS').disabled=false;
+    },
+    {enableHighAccuracy:true,maximumAge:0,timeout:20000}
+  );
+}
+$('reportBtn').onclick=()=>{
+  const tagInput=$('reportTag');tagInput.value=selectedTree?tag(selectedTree):'';
+  $('reportResult').style.display='none';$('reportForm').reset();
+  tagInput.value=selectedTree?tag(selectedTree):'';
+  reportGPS=null;$('reportLocation').value='Waiting for GPS location…';
+  $('reportGPSStatus').textContent='Location is mandatory to submit a report.';
+  updatePhotoRequirement();$('reportBackdrop').classList.add('show');requestReportGPS();
+};
+$('reportClose').onclick=()=>$('reportBackdrop').classList.remove('show');
+$('reportBackdrop').addEventListener('click',e=>{if(e.target===$('reportBackdrop'))$('reportBackdrop').classList.remove('show')});
+$('getReportGPS').onclick=requestReportGPS;
+$('reportTag').addEventListener('input',updatePhotoRequirement);
+$('reportCategory').addEventListener('change',updatePhotoRequirement);
+function readEvidenceAsBase64(file){
+  return new Promise((resolve,reject)=>{
+    if(!file){resolve(null);return;}
+    if(file.size>MAX_EVIDENCE_BYTES){
+      reject(new Error('Evidence photograph must be 5 MB or smaller.'));
+      return;
+    }
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const result=String(reader.result||'');
+      const comma=result.indexOf(',');
+      resolve({
+        filename:file.name,
+        mime_type:file.type||'application/octet-stream',
+        base64:comma>=0?result.slice(comma+1):''
+      });
+    };
+    reader.onerror=()=>reject(new Error('Could not read the selected photograph.'));
+    reader.readAsDataURL(file);
+  });
+}
+function setReportSubmitState(busy,message){
+  const btn=$('reportSubmitBtn');
+  if(btn){btn.disabled=busy;btn.textContent=busy?'Submitting…':'Submit report';}
+  if(message){$('reportResult').textContent=message;$('reportResult').style.display='block';}
+}
+let reportSubmitTimeout=null;
+window.addEventListener('message',event=>{
+  const frame=$('arboReportFrame');
+  if(!frame||event.source!==frame.contentWindow)return;
+  const result=event.data;
+  if(!result||result.type!=='ARBOGUIDE_REPORT_RESULT')return;
+  if(reportSubmitTimeout){clearTimeout(reportSubmitTimeout);reportSubmitTimeout=null;}
+  setReportSubmitState(false,'');
+  if(result.ok){
+    $('reportResult').textContent=`REPORT SUBMITTED SUCCESSFULLY\nReference: ${result.reportId}\n\nYour report is now in the private ArboGuide review queue. The master tree inventory has not been changed.`;
+    $('reportResult').style.display='block';
+    $('reportForm').reset();
+    reportGPS=null;
+    $('reportLocation').value='Report submitted';
+    $('reportGPSStatus').textContent='Submission complete.';
+    updatePhotoRequirement();
+  }else{
+    $('reportResult').textContent='SUBMISSION FAILED\n'+(result.error||'The report could not be saved. Please try again.');
+    $('reportResult').style.display='block';
+  }
+});
+$('reportForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  updatePhotoRequirement();
+  if(!reportGPS){$('reportGPSStatus').textContent='GPS location is mandatory. Capture your current location before submitting.';return}
+  if(reportGPSBusy){$('reportGPSStatus').textContent='GPS capture is still in progress. Please wait.';return}
+  if(!$('reportForm').reportValidity())return;
+  if(!REPORT_ENDPOINT.startsWith('https://script.google.com/macros/s/')){
+    setReportSubmitState(false,'Backend setup required: deploy the supplied Google Apps Script, then paste its Web App URL into REPORT_ENDPOINT in this HTML file.');
+    return;
+  }
+  const evidenceFile=$('reportEvidence').files[0]||null;
+  const requiresPhoto=$('reportEvidence').required;
+  const submitButton=$('reportSubmitBtn');
+  try{
+    setReportSubmitState(true,'Preparing your report securely…');
+    const evidence=await readEvidenceAsBase64(evidenceFile);
+    const payload={
+      physical_tree_tag_id:$('reportTag').value.trim(),
+      category:$('reportCategory').value,
+      attribute:$('reportAttribute').value,
+      suggested_correction:$('reportSuggestion').value.trim(),
+      description:$('reportDescription').value.trim(),
+      reporter_gps:reportGPS,
+      evidence: evidence,
+      evidence_required: requiresPhoto,
+      contact:$('reportContact').value.trim(),
+      website:''
+    };
+    const postForm=document.createElement('form');
+    postForm.method='POST';
+    postForm.action=REPORT_ENDPOINT;
+    postForm.target='arboReportFrame';
+    postForm.style.display='none';
+    const payloadInput=document.createElement('input');
+    payloadInput.type='hidden';
+    payloadInput.name='payload';
+    payloadInput.value=JSON.stringify(payload);
+    postForm.appendChild(payloadInput);
+    document.body.appendChild(postForm);
+    setReportSubmitState(true,'Sending report to the private review register…');
+    postForm.submit();
+    postForm.remove();
+    reportSubmitTimeout=setTimeout(()=>{
+      setReportSubmitState(false,'No confirmation received yet. Check your connection. Do not submit repeatedly until you check the private report sheet.');
+    },45000);
+  }catch(err){
+    setReportSubmitState(false,err.message||'Could not prepare the report.');
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTreeCard();$('reportBackdrop').classList.remove('show')}});
+fetch(DATA_URL).then(r=>{if(!r.ok)throw Error(`Could not load ${DATA_URL}. Confirm that this HTML is in D:\\ArboGuide and web_data\\trees.json exists.`);return r.json()})
+.then(data=>{
+  if(!Array.isArray(data))throw Error('trees.json must contain a JSON array.');
+  trees=data;fillAreas();addMarkers();render();
+  $('status').innerHTML=`<strong>Campus inventory loaded.</strong> ${trees.length.toLocaleString()} tree records loaded across ${[...new Set(trees.map(t=>t.addr).filter(Boolean))].length} campus areas.`;
+})
+.catch(e=>{$('mapCaption').textContent='Inventory loading error';$('status').innerHTML='<strong>Could not load campus inventory.</strong> '+esc(e.message)});
+</script>
+</body>
+</html>
