@@ -65,12 +65,38 @@ footer{padding:0 16px 24px;color:var(--muted);font-size:11px;line-height:1.6}
 #locationReportHint .hint-arrow{display:inline-block;font-size:20px;font-weight:900;color:#176b45;margin-left:5px;animation:hintNudge .8s ease-in-out infinite alternate}
 @keyframes hintNudge{from{transform:translateX(0)}to{transform:translateX(6px)}}
 @keyframes hintPulse{0%,100%{box-shadow:0 5px 22px #0002}50%{box-shadow:0 5px 22px #d8a92888}}
-@media(max-width:520px){#locationReportHint{top:auto;bottom:78px;right:16px;width:min(300px,calc(100vw - 32px))}#locationReportHint:after{right:28px;top:auto;bottom:-9px;transform:rotate(135deg)}}
+@media(max-width:520px){
+  /* Keep the report control vertical on the right edge on phones too. */
+  #reportBtn{
+    top:42%;
+    bottom:auto;
+    right:0;
+    transform:rotate(180deg);
+    writing-mode:vertical-rl;
+    border-radius:0 12px 12px 0;
+    padding:14px 10px;
+    z-index:1600;
+    max-height:38vh;
+  }
+  #reportBtn span{flex-direction:row}
+  /* Keep the dismissible help bubble beside the side control, with its arrow pointing right. */
+  #locationReportHint{
+    top:39%;
+    bottom:auto;
+    right:62px;
+    width:min(300px,calc(100vw - 100px));
+  }
+  #locationReportHint:after{
+    right:-9px;
+    top:50%;
+    bottom:auto;
+    transform:translateY(-50%) rotate(45deg);
+  }
+}
 
 .leaflet-popup-content{line-height:1.5}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:10px;gap:12px}header{padding:19px 16px}#map{height:48vh;min-height:340px;max-height:560px}#treeList{max-height:360px}}
-@media(max-width:520px){#reportBtn{top:auto;bottom:18px;right:12px;transform:none;writing-mode:horizontal-tb;border-radius:25px;padding:12px 15px}
-#reportBtn span{flex-direction:row}.tree-card,.report-card{max-height:94vh;border-radius:16px}.tree-card-photo{height:220px}
+@media(max-width:520px){.tree-card,.report-card{max-height:94vh;border-radius:16px}.tree-card-photo{height:220px}
 .tree-card-content,.report-content{padding:15px}.tree-attributes{grid-template-columns:1fr 1fr;gap:0 12px}}
 </style>
 </head>
