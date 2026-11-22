@@ -21,6 +21,9 @@ main{padding:16px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330
 .controls,.filters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 14px}
 button,select{font:inherit;border:0;border-radius:11px;padding:10px 13px;background:var(--green);color:white;font-weight:750;cursor:pointer}
 button.secondary{background:var(--mint);color:var(--green);border:1px solid #d2e4d7}button:disabled{opacity:.5;cursor:default}
+.ar-explore-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 13px;border-radius:11px;background:#eaf4ed;color:#173f32;border:1px solid #b9d6c2;font-weight:800;text-decoration:none;font-size:14px;white-space:nowrap}
+.ar-explore-link:hover{background:#dceee1}
+
 select,input,textarea{font:inherit;border:1px solid #d7e2d8;border-radius:11px;padding:10px 11px;background:white;color:var(--ink);width:100%}
 .status{margin:0 14px 12px;padding:11px 12px;background:#f3f7f3;border:1px solid var(--line);border-radius:11px;font-size:12px;line-height:1.5;color:#43574b}.status strong{color:var(--green)}
 .search{padding:12px 14px;border-bottom:1px solid var(--line)}#treeList{max-height:490px;overflow:auto}
@@ -31,7 +34,7 @@ select,input,textarea{font:inherit;border:1px solid #d7e2d8;border-radius:11px;p
 #alert{display:none;margin:12px 14px 14px;padding:12px;border:1px solid #b6d9bf;background:#eef8f0;border-radius:14px;gap:12px;align-items:center}
 #alert.show{display:flex}#alert img{width:76px;height:84px;object-fit:cover;border-radius:10px;background:#dfeade}
 #alert h3{margin:0 0 3px;font-size:17px}#alert p{font-size:12px;margin:6px 0;color:#43574b}
-footer{padding:0 16px 24px;color:var(--muted);font-size:11px;line-height:1.6;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;gap:5px}.copyright{margin-left:0;text-align:left;white-space:nowrap;font-weight:750;color:var(--green)}
+footer{padding:0 16px 24px;color:var(--muted);font-size:11px;line-height:1.6}
 .tree-marker{background:#176b45;border:2.5px solid #fff;border-radius:50%;box-shadow:0 2px 7px #0008;width:17px;height:17px}
 #treeCardBackdrop,#reportBackdrop{display:none;position:fixed;inset:0;z-index:2000;background:#071b14b8;backdrop-filter:blur(4px);padding:16px;align-items:center;justify-content:center}
 #treeCardBackdrop.show,#reportBackdrop.show{display:flex}
@@ -54,19 +57,21 @@ footer{padding:0 16px 24px;color:var(--muted);font-size:11px;line-height:1.6;dis
 #reportResult{display:none;margin-top:12px;padding:12px;border-radius:10px;background:#eef8f0;border:1px solid #b6d9bf;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
 #reportBtn{position:fixed;right:0;top:48%;z-index:1500;writing-mode:vertical-rl;transform:rotate(180deg);border-radius:0 12px 12px 0;padding:16px 11px;box-shadow:0 4px 16px #0003;letter-spacing:.02em}
 #reportBtn span{display:inline-flex;align-items:center;gap:8px}#reportBtn .flag{font-size:17px}
-#locationReportHint{display:none;position:fixed;z-index:1490;right:62px;top:44%;width:min(310px,calc(100vw - 100px));padding:12px 14px;background:#fffdf2;border:1px solid #e6c86e;border-radius:13px;box-shadow:0 5px 22px #0002;color:#34463a;font-size:12px;line-height:1.45}
+#locationReportHint{display:none;position:fixed;z-index:1490;right:62px;top:44%;width:min(310px,calc(100vw - 100px));padding:34px 14px 12px;background:#fffdf2;border:1px solid #e6c86e;border-radius:13px;box-shadow:0 5px 22px #0002;color:#34463a;font-size:12px;line-height:1.45}
+#locationReportHint .hint-close{position:absolute;top:7px;right:7px;width:25px;height:25px;min-width:25px;padding:0;border:1px solid #e5d69d;border-radius:50%;background:#f5edcf;color:#34463a;font-size:19px;font-weight:800;line-height:1;display:grid;place-items:center;box-shadow:none}
+#locationReportHint .hint-close:focus-visible{outline:3px solid #176b45;outline-offset:2px}
 #locationReportHint.show{display:block;animation:hintPulse 1.8s ease-in-out 2}
 #locationReportHint:after{content:"";position:absolute;right:-9px;top:50%;width:15px;height:15px;background:#fffdf2;border-top:1px solid #e6c86e;border-right:1px solid #e6c86e;transform:translateY(-50%) rotate(45deg)}
 #locationReportHint .hint-arrow{display:inline-block;font-size:20px;font-weight:900;color:#176b45;margin-left:5px;animation:hintNudge .8s ease-in-out infinite alternate}
 @keyframes hintNudge{from{transform:translateX(0)}to{transform:translateX(6px)}}
 @keyframes hintPulse{0%,100%{box-shadow:0 5px 22px #0002}50%{box-shadow:0 5px 22px #d8a92888}}
-@media(max-width:520px){#locationReportHint{top:auto;bottom:24%;left:12px;right:76px;width:auto;max-width:300px}#locationReportHint:after{right:-9px;left:auto;top:50%;bottom:auto;transform:translateY(-50%) rotate(45deg)}}
+@media(max-width:520px){#locationReportHint{top:auto;bottom:78px;right:16px;width:min(300px,calc(100vw - 32px))}#locationReportHint:after{right:28px;top:auto;bottom:-9px;transform:rotate(135deg)}}
 
 .leaflet-popup-content{line-height:1.5}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:10px;gap:12px}header{padding:19px 16px}#map{height:48vh;min-height:340px;max-height:560px}#treeList{max-height:360px}}
-@media(max-width:520px){#reportBtn{top:auto;bottom:24%;right:8px;left:auto;transform:none;writing-mode:vertical-rl;border-radius:12px;padding:14px 9px;z-index:1500}
+@media(max-width:520px){#reportBtn{top:auto;bottom:18px;right:12px;transform:none;writing-mode:horizontal-tb;border-radius:25px;padding:12px 15px}
 #reportBtn span{flex-direction:row}.tree-card,.report-card{max-height:94vh;border-radius:16px}.tree-card-photo{height:220px}
-.tree-card-content,.report-content{padding:15px}.report-content{padding-bottom:120px}.tree-attributes{grid-template-columns:1fr 1fr;gap:0 12px}}
+.tree-card-content,.report-content{padding:15px}.tree-attributes{grid-template-columns:1fr 1fr;gap:0 12px}}
 </style>
 </head>
 <body>
@@ -76,7 +81,7 @@ footer{padding:0 16px 24px;color:var(--muted);font-size:11px;line-height:1.6;dis
   <div class="head"><h2>Tree map</h2><span class="small" id="mapCaption">Loading inventory…</span></div>
   <div id="map"></div>
   <div class="controls">
-    <button id="locate">◎ Find my location</button><button id="stop" class="secondary" disabled>Stop GPS</button><button id="all" class="secondary">Show all trees</button>
+    <button id="locate">◎ Find my location</button><button id="stop" class="secondary" disabled>Stop GPS</button><button id="all" class="secondary">Show all trees</button><a class="ar-explore-link" href="ar-test.html" aria-label="Open ArboGuide AR Tree Explorer">⌖ Explore in AR</a>
   </div>
   <div id="status" class="status"><strong>Loading campus inventory.</strong> Please wait.</div>
   <div id="alert"><img id="alertImg" alt="Tree photo"><div><div class="eyebrow" style="color:#39734f;opacity:1">Nearby tree detected</div><h3 id="alertName"></h3><div class="bot" id="alertBot"></div><p id="alertDist"></p><div style="display:flex;gap:7px;flex-wrap:wrap"><button id="viewNearby" style="padding:7px 10px">View details</button><button id="dismiss" class="secondary" style="padding:7px 10px">Dismiss</button></div></div></div>
@@ -88,10 +93,11 @@ footer{padding:0 16px 24px;color:var(--muted);font-size:11px;line-height:1.6;dis
   <div id="treeList"></div>
 </section>
 </main>
-<footer><span>GPS-based tree identification. Device GPS accuracy may vary and can affect results. Please wait for GPS to stabilise.</span><span class="copyright">©KISHAN GOWDA G C</span></footer>
+<footer>GPS-based nearby-tree detection uses the inventory coordinates. Phone GPS can drift, so the 7-metre proximity trigger is approximate. GPS requires permission and a secure connection (HTTPS or localhost). Tree photographs are served from ArboGuide's Cloudflare R2 public development URL.</footer>
 
 <button id="reportBtn" type="button" aria-label="Report a problem"><span><b class="flag">⚑</b> Report a problem</span></button>
 <div id="locationReportHint" role="status" aria-live="polite">
+  <button type="button" class="hint-close" id="locationReportHintClose" aria-label="Close help message" title="Close">×</button>
   <b>Help us keep ArboGuide accurate.</b><br>
   If you notice an incorrect tree name or a tree shown in the wrong location, please submit a report using the <b>Report a problem</b> side button.
   <span class="hint-arrow" aria-hidden="true">➜</span>
@@ -237,12 +243,20 @@ function start(){
   $('stop').disabled=false;
 }
 function stop(){if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;$('locate').disabled=false;$('stop').disabled=true;$('status').innerHTML='<strong>GPS stopped.</strong> Location is no longer being watched.'}
-function showLocationReportHint(){
-  const hint=$('locationReportHint');
-  hint.classList.add('show');
+let locationReportHintDismissed=false; // Session-only: resets naturally when the page is reloaded.
+function hideLocationReportHint(){
+  $('locationReportHint').classList.remove('show');
 }
+function showLocationReportHint(){
+  if(locationReportHintDismissed)return;
+  $('locationReportHint').classList.add('show');
+}
+$('locationReportHintClose').addEventListener('click',()=>{
+  locationReportHintDismissed=true;
+  hideLocationReportHint();
+});
 $('locate').onclick=()=>{showLocationReportHint();start()};
-$('reportBtn').addEventListener('click',()=>{$('locationReportHint').classList.remove('show')});
+$('reportBtn').addEventListener('click',hideLocationReportHint);
 $('stop').onclick=stop;
 $('all').onclick=()=>{const a=trees.filter(valid);if(a.length)map.fitBounds(L.latLngBounds(a.map(t=>[+t.latitude,+t.longitude])),{padding:[25,25],maxZoom:18})};
 $('q').oninput=render;

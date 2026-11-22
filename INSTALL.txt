@@ -1,0 +1,96 @@
+ARBOGUIDE — LINKED AR TEST BUILD (UPDATED)
+
+This package contains:
+- index.html: ArboGuide homepage with an “Explore in AR” link in the map controls.
+- ar-test.html: separate location-based AR test page.
+
+AR updates in this version:
+1. Nearby trees are sorted by shortest current distance; the nearest tree is selected first.
+2. Floating-label distance text refreshes as GPS positions update.
+3. Device GPS accuracy is displayed dynamically as ± metres.
+4. Floating labels show physical Tree Tag ID, highlighted tree name, botanical name, height (ht), canopy (can), age (age), and distance.
+5. Labels use a compact pale fill with a thin forest-green border and dark contrasting text.
+6. The selected-tree card also displays height, canopy and age.
+
+IMPORTANT DATA NOTE
+- Height, canopy and age are read from the existing JSON fields ht, can and age.
+- The units are not asserted by this prototype because their source units have not been independently confirmed. Values are displayed as stored.
+- If any field is blank in the source record, the label displays an em dash.
+
+INSTALLATION
+1. Back up your current local ArboGuide folder.
+2. Copy the updated index.html and ar-test.html from this package into the site root.
+3. Keep the existing web_data folder unchanged and beside both HTML files.
+4. Confirm this structure:
+   site-root/
+     index.html
+     ar-test.html
+     web_data/
+       trees.json
+       areas/
+5. Test locally, then deploy to the existing Netlify site only when you approve.
+
+The live site has NOT been modified or deployed by this package.
+
+LIMITATIONS
+- This is location-based AR, not visual tree recognition or trunk-anchored tracking.
+- GPS/compass estimates may be less accurate than the 10 m display radius.
+- Android Chrome is the initial target. iPhone support has not yet been verified.
+- External A-Frame/AR.js libraries are loaded from public CDNs; internet access is required.
+
+
+COMPASS DIAGNOSTIC (NEW)
+-----------------------
+Open compass-diagnostic.html from the same local web server to test the phone's
+orientation sensor before using the AR page. On Android Chrome, tap "Enable
+compass readings", allow any requested permission, hold the phone upright, and
+rotate it slowly. The page shows raw sensor values, an experimental heading, a
+circularly smoothed heading, and short-term variation over recent readings.
+
+The stability indicator measures short-term fluctuation only. It does not prove
+that the compass is calibrated or that the absolute direction is correct. The
+diagnostic page is separate and does not change the AR camera or GPS controls.
+
+AR COMPASS STABILITY MONITOR (INTEGRATED)
+----------------------------------------
+The AR page includes a compact compass status display in the top information area:
+- Collecting: waiting for enough recent orientation samples.
+- Stable: low short-term heading variation; an absolute heading reference was seen.
+- Steady, reference unconfirmed: readings fluctuate little, but the browser has
+  not confirmed an absolute orientation reference.
+- Fluctuating / Unstable: recent readings vary; hold the phone still and move
+  away from vehicles, metal structures, magnetic mounts and electrical equipment.
+- No readings / Permission needed: open the compass diagnostic page to inspect
+  sensor availability and browser permissions.
+
+Tap “Calibrate compass / diagnostics” from the AR screen to open
+compass-diagnostic.html. After testing, use the page's “Return to AR test” link.
+
+IMPORTANT: The AR-page monitor is observational only. It does not replace or
+modify AR.js camera orientation, does not apply a second heading controller,
+and does not claim to magnetically calibrate the phone. The variation value is
+an indicator of short-term sensor fluctuation, not proof of absolute accuracy.
+
+
+MOBILE INTERFACE CLEANUP (NEW)
+------------------------------
+The AR test page layout has been refined for narrow Android screens:
+- Brand, nearby-tree status and Exit AR controls have separate layout regions.
+- GPS accuracy, compass state, variation details and diagnostics link wrap into
+  compact rows instead of competing for the same horizontal space.
+- The persistent compass hint was removed from the camera view to reduce clutter.
+- The selected-tree card uses consistent system sans-serif typography, smaller
+  image dimensions, clearer text hierarchy and a horizontally scrollable nearby list.
+- Safe-area spacing is applied for phone status/navigation bars.
+- The unused A-Frame VR entry control is hidden in this GPS-only experience.
+
+These changes are presentation-only. The tree data, GPS proximity calculations,
+AR label creation, compass monitoring and camera initialization logic are retained.
+
+HOMEPAGE HELP POPUP CLOSE CONTROL (NEW)
+--------------------------------------
+The yellow “Help us keep ArboGuide accurate” guidance popup now has an
+accessible × close button in its upper-right corner. Closing it hides the
+message for the current page session only. It can appear again after a page
+reload and does not disable the Report a Problem button or change map/GPS
+functionality.

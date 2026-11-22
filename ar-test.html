@@ -6,34 +6,50 @@
 <meta name="theme-color" content="#153c2e">
 <title>ArboGuide | AR Tree Explorer (Test)</title>
 <style>
-:root{--green:#174c37;--leaf:#2d8055;--mint:#e9f4ed;--ink:#18312a;--muted:#61736a}
+:root{--green:#174c37;--leaf:#2d8055;--mint:#e9f4ed;--ink:#18312a;--muted:#61736a;--panel:#10251ee8;--line:#ffffff2b}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:#101b16;color:white}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Inter,Roboto,"Segoe UI",Arial,sans-serif;background:#101b16;color:white;-webkit-font-smoothing:antialiased}
 #sceneHost{position:fixed;inset:0;z-index:1;background:#101b16}
 a-scene{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
-#topbar{position:fixed;z-index:5;top:0;left:0;right:0;padding:12px 14px;background:linear-gradient(#10251ddd,transparent);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
-.brand{font-weight:800;font-size:15px;letter-spacing:.3px}.sub{font-size:11px;color:#d4e5d9;margin-top:3px}
-#statusPill{font-size:11px;background:#142e23dd;border:1px solid #8ab69a;border-radius:20px;padding:7px 10px;max-width:48%;text-align:right}
+#topbar{position:fixed;z-index:5;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 9px) 13px 12px;background:linear-gradient(180deg,rgba(5,28,20,.72) 0%,rgba(5,28,20,.40) 76%,rgba(5,28,20,0) 100%);pointer-events:none}
+.topbarHead{display:grid;grid-template-columns:minmax(0,1fr) minmax(112px,42%);align-items:start;gap:10px;min-width:0}
+.brandBlock{min-width:0;max-width:none}
+.brand{font-weight:850;font-size:14px;line-height:1.2;letter-spacing:.055em;color:#f5fbf6;text-shadow:0 1px 5px #0008}
+.sub{font-size:11px;line-height:1.35;color:#d7e7dc;margin-top:4px;text-shadow:0 1px 4px #0008}
+.topActions{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0}
+#statusPill{display:inline-flex;align-items:center;justify-content:center;width:100%;max-width:100%;min-height:34px;padding:7px 9px;border-radius:14px;background:rgba(224,246,232,.13);backdrop-filter:blur(12px) saturate(135%);-webkit-backdrop-filter:blur(12px) saturate(135%);border:1px solid rgba(220,255,231,.38);color:#f5fff7;font-size:11px;font-weight:750;line-height:1.25;text-align:center;overflow-wrap:anywhere;text-shadow:0 1px 3px #0007}
+#topMeta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:6px 7px;margin-top:8px;min-width:0;pointer-events:auto}
+#gpsAccuracy{display:flex;align-items:center;justify-content:center;min-width:0;min-height:30px;padding:5px 8px;border:1px solid rgba(235,255,241,.30);border-radius:11px;background:rgba(9,37,27,.28);backdrop-filter:blur(10px) saturate(130%);-webkit-backdrop-filter:blur(10px) saturate(130%);color:#edf8f0;font-size:10px;line-height:1.25;font-weight:650;text-align:center;text-shadow:0 1px 3px #0008}
+#compassStatus{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;min-height:30px;padding:5px 8px;border-radius:11px;background:rgba(9,37,27,.28);backdrop-filter:blur(10px) saturate(130%);-webkit-backdrop-filter:blur(10px) saturate(130%);border:1px solid rgba(235,255,241,.30);color:#f3fff6;font-size:10px;font-weight:750;line-height:1.2;white-space:normal;text-align:center}
+#compassDot{width:7px;height:7px;border-radius:50%;background:#d9b65a;flex:none}
+.compassSubRow{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:1px 2px 0}
+#compassDetail{display:block;min-width:0;flex:1 1 auto;color:#e0eee4;font-size:10px;line-height:1.3;margin:0;overflow-wrap:anywhere;text-shadow:0 1px 4px #0009}
+#compassHelp{display:inline-block;flex:none;color:#e2f5e7;font-size:10px;font-weight:750;text-decoration:underline;text-underline-offset:2px;margin:0;pointer-events:auto;text-shadow:0 1px 4px #0009}
+#exitBtn{position:static;z-index:8;align-self:flex-end;flex:none;background:rgba(238,249,241,.14);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#f5fff7;border:1px solid rgba(235,255,241,.42);padding:7px 11px;font-size:11px;border-radius:11px;display:none;pointer-events:auto;box-shadow:0 2px 10px #0002;text-shadow:0 1px 3px #0007}
 #startPanel{position:fixed;z-index:10;inset:0;background:linear-gradient(160deg,#153c2e,#0c2119);display:flex;align-items:center;justify-content:center;padding:24px}
 .panel{max-width:440px;width:100%;background:#f8fbf8;color:var(--ink);border-radius:20px;padding:24px;box-shadow:0 18px 60px #0006}
 .panel h1{font-size:25px;margin:0 0 8px}.panel p{font-size:14px;line-height:1.55;color:#52665b}
 .panel ul{font-size:13px;line-height:1.65;padding-left:19px;color:#43584c}
-button{border:0;border-radius:12px;background:var(--leaf);color:white;font-weight:750;font-size:15px;padding:14px 18px;cursor:pointer}
+button{border:0;border-radius:12px;background:var(--leaf);color:white;font-weight:750;font-size:14px;padding:12px 16px;cursor:pointer}
 button:disabled{opacity:.5}
 #startBtn{width:100%;margin-top:10px}
-#backLink{display:block;text-align:center;color:#41634f;margin-top:14px;font-size:13px;text-decoration:none}
-#bottomPanel{position:fixed;z-index:6;bottom:0;left:0;right:0;padding:12px 12px max(14px,env(safe-area-inset-bottom));background:linear-gradient(transparent,#08150fee 14%);display:none}
-#treeCard{display:flex;gap:11px;align-items:center;background:#f7faf7;color:var(--ink);border-radius:15px;padding:9px;box-shadow:0 5px 24px #0004}
-#treePhoto{width:76px;height:76px;object-fit:cover;border-radius:10px;background:#dce7df;flex:none;display:none}
-#treeText{min-width:0;flex:1}.tag{font-size:11px;font-weight:800;color:#26724a;margin-bottom:4px}
-#treeName{font-size:15px;font-weight:800;line-height:1.2}#treeBot{font-size:12px;color:#61736a;font-style:italic;margin-top:4px}
-#treeDistance{font-size:11px;color:#53665b;margin-top:5px}
-#nearbyStrip{display:flex;gap:7px;overflow-x:auto;padding:9px 1px 1px}
-.nearbyBtn{white-space:nowrap;padding:8px 11px;font-size:11px;border-radius:20px;background:#eff7f1;color:#194b35;border:1px solid #c5ddcd}
-#bottomNote{font-size:10px;color:#e3eee6;text-align:center;margin-top:7px}
-#message{position:fixed;z-index:8;top:72px;left:12px;right:12px;max-width:520px;margin:auto;background:#fff8e6;color:#634c1b;border:1px solid #ead69e;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.4;display:none}
-#exitBtn{position:fixed;z-index:8;right:12px;top:72px;background:#10251ddd;border:1px solid #d3e5d9;padding:9px 12px;font-size:12px;display:none}
-#compassHint{position:fixed;z-index:7;top:118px;left:12px;right:12px;text-align:center;color:white;font-size:11px;text-shadow:0 1px 4px #000;pointer-events:none}
+#backLink,#compassLink{display:block;text-align:center;color:#41634f;margin-top:14px;font-size:13px;text-decoration:none}
+#bottomPanel{position:fixed;z-index:6;bottom:0;left:0;right:0;padding:10px 12px max(12px,env(safe-area-inset-bottom));background:linear-gradient(transparent,#07150fee 13%);display:none;pointer-events:none}
+#treeCard{display:flex;gap:10px;align-items:center;background:#f7faf7;color:var(--ink);border:1px solid #dce9df;border-radius:17px;padding:10px;box-shadow:0 6px 24px #0005;max-width:680px;margin:0 auto;pointer-events:auto}
+#treePhoto{width:68px;height:68px;object-fit:cover;border-radius:11px;background:#dce7df;flex:none;display:none}
+#treeText{min-width:0;flex:1}.tag{font-size:10px;letter-spacing:.04em;font-weight:850;color:#26724a;margin-bottom:3px}
+#treeAttributes{font-size:11px;line-height:1.35;color:#53665b;margin-top:5px}
+#treeDistance{font-size:11px;line-height:1.3;color:#53665b;margin-top:4px}
+#treeName{font-size:16px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}#treeBot{font-size:11px;line-height:1.3;color:#61736a;font-style:italic;margin-top:3px;overflow-wrap:anywhere}
+#nearbyStrip{display:flex;gap:7px;overflow-x:auto;padding:8px 2px 2px;max-width:680px;margin:0 auto;scrollbar-width:none;pointer-events:auto}#nearbyStrip::-webkit-scrollbar{display:none}
+.nearbyBtn{white-space:nowrap;flex:none;padding:8px 11px;font-size:11px;border-radius:20px;background:#eff7f1;color:#194b35;border:1px solid #c5ddcd;min-height:34px}
+#bottomNote{font-size:9px;line-height:1.3;color:#e3eee6;text-align:center;margin:5px auto 0;max-width:680px;text-shadow:0 1px 3px #000;pointer-events:none}
+#message{position:fixed;z-index:8;top:calc(env(safe-area-inset-top) + 160px);left:12px;right:12px;max-width:520px;margin:auto;background:rgba(8,31,23,.64);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#f3fff6;border:1px solid rgba(235,255,241,.32);padding:9px 12px;border-radius:13px;font-size:11px;line-height:1.4;display:none;box-shadow:0 3px 14px #0002;text-shadow:0 1px 3px #0006}
+#compassHint{display:none;position:fixed;z-index:4;top:calc(env(safe-area-inset-top) + 205px);left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 28px);padding:6px 10px;border:1px solid rgba(255,255,255,.24);border-radius:20px;background:rgba(7,26,20,.38);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);text-align:center;color:#e4eee7;font-size:10px;line-height:1.3;text-shadow:0 1px 3px #000;pointer-events:none}
+/* The standard A-Frame VR entry point is not used in this GPS-only experience. */
+.a-enter-vr{display:none!important}
+@media(max-width:380px){.topbarHead{grid-template-columns:minmax(0,1fr) minmax(106px,40%);gap:8px}.brand{font-size:12px}.sub{font-size:10px}#statusPill{font-size:10px;padding:6px 7px}#gpsAccuracy,#compassStatus{font-size:9px;padding:5px 6px}#compassDetail,#compassHelp{font-size:9px}#treePhoto{width:58px;height:58px}#treeName{font-size:14px}#treeBot{font-size:10px}#treeAttributes,#treeDistance{font-size:10px}#message{top:calc(env(safe-area-inset-top) + 174px)}#compassHint{top:calc(env(safe-area-inset-top) + 215px)}}
+@media(max-height:650px){#bottomPanel{padding-top:6px}#treePhoto{width:54px;height:54px}#treeCard{padding:7px}#nearbyStrip{padding-top:5px}#bottomNote{display:none}}
 </style>
 <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/three.js/build/ar-threex-location-only.js"></script>
@@ -54,8 +70,21 @@ button:disabled{opacity:.5}
 </div>
 
 <div id="topbar">
-  <div><div class="brand">ARBOGUIDE · AR TREE EXPLORER</div><div class="sub">Location-based AR prototype · 10 m range</div></div>
-  <div id="statusPill">Not started</div>
+  <div class="topbarHead">
+    <div class="brandBlock"><div class="brand">ARBOGUIDE · AR TREE EXPLORER</div><div class="sub">Location-based tree discovery · 10 m range</div></div>
+    <div class="topActions">
+      <button id="exitBtn">Exit AR</button>
+      <div id="statusPill">Not started</div>
+    </div>
+  </div>
+  <div id="topMeta">
+    <span id="gpsAccuracy">GPS accuracy: waiting</span>
+    <div id="compassStatus" role="status" aria-live="polite"><span id="compassDot"></span><span id="compassState">Compass: waiting</span></div>
+    <div class="compassSubRow">
+      <span id="compassDetail">Compass stability will be checked during AR.</span>
+      <a id="compassHelp" href="compass-diagnostic.html">Calibrate compass ↗</a>
+    </div>
+  </div>
 </div>
 
 <div id="startPanel">
@@ -70,13 +99,13 @@ button:disabled{opacity:.5}
     </ul>
     <p><b>Accuracy note:</b> this prototype only displays mapped trees estimated within 10 metres. Phone GPS and compass errors can still place labels incorrectly.</p>
     <button id="startBtn">Start AR experience</button>
+    <a id="compassLink" href="compass-diagnostic.html">◎ Open compass diagnostic</a>
     <a id="backLink" href="/">← Back to ArboGuide</a>
   </div>
 </div>
 
 <div id="message"></div>
-<button id="exitBtn">Exit AR</button>
-<div id="compassHint">Move slowly and calibrate the compass if labels appear in the wrong direction.</div>
+<div id="compassHint">Move slowly; use compass diagnostics if labels point the wrong way.</div>
 
 <div id="bottomPanel">
   <div id="treeCard">
@@ -85,6 +114,7 @@ button:disabled{opacity:.5}
       <div class="tag" id="treeTag">Select a nearby tree</div>
       <div id="treeName">Nearby tree information</div>
       <div id="treeBot"></div>
+      <div id="treeAttributes"></div>
       <div id="treeDistance"></div>
     </div>
   </div>
@@ -109,6 +139,13 @@ let watchId = null;
 let lastRefresh = 0;
 let activeEntities = new Map();
 let nearestTrees = [];
+let selectedTree = null;
+
+// Compass monitor is observational only: AR.js retains control of camera orientation.
+let compassListener = '';
+let compassSamples = [];
+let compassSampleCount = 0;
+let compassAbsoluteSeen = false;
 
 const $ = id => document.getElementById(id);
 const scene = $('arScene');
@@ -163,50 +200,92 @@ AFRAME.registerComponent('face-ar-camera', {
   }
 });
 
+function treeKey(t) {
+  return String(t.tree_id ?? t.record_id ?? physicalTag(t));
+}
+function attributeValue(value) {
+  return value === null || value === undefined || String(value).trim() === '' ? '—' : String(value).trim();
+}
 function makeLabel(t, distance) {
   const entity = document.createElement('a-entity');
   entity.setAttribute('gps-new-entity-place',
     `latitude: ${Number(t.latitude)}; longitude: ${Number(t.longitude)}`);
   entity.setAttribute('face-ar-camera', '');
-  entity.dataset.treeKey = String(t.tree_id ?? t.record_id ?? physicalTag(t));
+  entity.dataset.treeKey = treeKey(t);
+
+  // Compact, restrained field label: dark thin border + pale fill.
+  const border = document.createElement('a-plane');
+  border.setAttribute('width', '1.92');
+  border.setAttribute('height', '1.12');
+  border.setAttribute('position', '0 1.48 0');
+  border.setAttribute('material', 'color:#315b43; opacity:0.96; transparent:true; side:double');
 
   const panel = document.createElement('a-plane');
-  panel.setAttribute('width', '2.4');
-  panel.setAttribute('height', '0.92');
-  panel.setAttribute('position', '0 1.55 0');
-  panel.setAttribute('material', 'color:#153c2e; opacity:0.88; transparent:true; side:double');
+  panel.setAttribute('width', '1.86');
+  panel.setAttribute('height', '1.06');
+  panel.setAttribute('position', '0 1.48 0.008');
+  panel.setAttribute('material', 'color:#f4f7f1; opacity:0.94; transparent:true; side:double');
 
   const tag = document.createElement('a-text');
   tag.setAttribute('value', physicalTag(t));
-  tag.setAttribute('color', '#b9f2c9');
+  tag.setAttribute('color', '#183c2b');
   tag.setAttribute('align', 'center');
-  tag.setAttribute('width', '2.2');
-  tag.setAttribute('position', '0 1.78 0.012');
+  tag.setAttribute('font', 'mozillavr');
+  tag.setAttribute('width', '1.72');
+  tag.setAttribute('wrap-count', '20');
+  tag.setAttribute('position', '0 1.83 0.02');
   tag.setAttribute('side', 'double');
 
+  const nameBg = document.createElement('a-plane');
+  nameBg.setAttribute('width', '1.72');
+  nameBg.setAttribute('height', '0.25');
+  nameBg.setAttribute('position', '0 1.59 0.021');
+  nameBg.setAttribute('material', 'color:#dcebdc; opacity:1; side:double');
+
   const name = document.createElement('a-text');
-  name.setAttribute('value', String(t.name || 'Tree name unavailable').slice(0, 42));
-  name.setAttribute('color', '#ffffff');
+  name.setAttribute('value', String(t.name || 'Tree name unavailable').slice(0, 34));
+  name.setAttribute('color', '#245d3a');
   name.setAttribute('align', 'center');
-  name.setAttribute('width', '2.15');
-  name.setAttribute('wrap-count', '28');
-  name.setAttribute('position', '0 1.48 0.012');
+  name.setAttribute('width', '1.62');
+  name.setAttribute('wrap-count', '22');
+  name.setAttribute('position', '0 1.54 0.035');
   name.setAttribute('side', 'double');
 
+  const bot = document.createElement('a-text');
+  bot.setAttribute('value', String(t.bot || '').slice(0, 38));
+  bot.setAttribute('color', '#53665b');
+  bot.setAttribute('align', 'center');
+  bot.setAttribute('width', '1.62');
+  bot.setAttribute('wrap-count', '27');
+  bot.setAttribute('position', '0 1.36 0.025');
+  bot.setAttribute('side', 'double');
+
+  const attrs = document.createElement('a-text');
+  attrs.setAttribute('value', `Ht ${attributeValue(t.ht)}  ·  Can ${attributeValue(t.can)}  ·  Age ${attributeValue(t.age)}`);
+  attrs.setAttribute('color', '#314d3b');
+  attrs.setAttribute('align', 'center');
+  attrs.setAttribute('width', '1.7');
+  attrs.setAttribute('wrap-count', '32');
+  attrs.setAttribute('position', '0 1.18 0.025');
+  attrs.setAttribute('side', 'double');
+
   const dist = document.createElement('a-text');
+  dist.classList.add('ar-distance');
   dist.setAttribute('value', `${distance.toFixed(1)} m`);
-  dist.setAttribute('color', '#e0eadf');
+  dist.setAttribute('color', '#315b43');
   dist.setAttribute('align', 'center');
-  dist.setAttribute('width', '1.8');
-  dist.setAttribute('position', '0 1.19 0.012');
+  dist.setAttribute('width', '1.5');
+  dist.setAttribute('position', '0 1.02 0.025');
   dist.setAttribute('side', 'double');
 
-  entity.appendChild(panel);
-  entity.appendChild(tag);
-  entity.appendChild(name);
-  entity.appendChild(dist);
+  [border, panel, tag, nameBg, name, bot, attrs, dist].forEach(el => entity.appendChild(el));
   scene.appendChild(entity);
   return entity;
+}
+
+function updateLabel(entity, t, distance) {
+  const dist = entity.querySelector('.ar-distance');
+  if (dist) dist.setAttribute('value', `${distance.toFixed(1)} m`);
 }
 
 function clearLabels() {
@@ -217,7 +296,9 @@ function clearLabels() {
 function renderSelected(t) {
   $('treeTag').textContent = `TREE TAG · ${physicalTag(t)}`;
   $('treeName').textContent = t.name || 'Tree name unavailable';
+  selectedTree = t;
   $('treeBot').textContent = t.bot || 'Botanical name unavailable';
+  $('treeAttributes').textContent = `Height: ${attributeValue(t.ht)}  ·  Canopy: ${attributeValue(t.can)}  ·  Age: ${attributeValue(t.age)}`;
   const d = distanceTo(t);
   $('treeDistance').textContent = `Estimated distance: ${d.toFixed(1)} m`;
   const img = $('treePhoto'), src = photoUrl(t);
@@ -246,7 +327,7 @@ function renderNearbyButtons(list) {
 function refreshNearby(force=false) {
   if (!currentPosition || !trees.length) return;
   const now = Date.now();
-  if (!force && now - lastRefresh < 2500) return;
+  if (!force && now - lastRefresh < 1000) return;
   lastRefresh = now;
 
   const candidates = [];
@@ -254,35 +335,40 @@ function refreshNearby(force=false) {
     const d = distanceTo(t);
     if (d <= MAX_RANGE_M) candidates.push({t, d});
   }
+  // Nearest-first ordering is used consistently for labels, list and default selection.
   candidates.sort((a,b) => a.d - b.d);
   nearestTrees = candidates.slice(0, MAX_LABELS).map(x => x.t);
 
-  // Remove labels that have moved outside the configured 10 m range.
-  const keep = new Set(nearestTrees.map(t => String(t.tree_id ?? t.record_id ?? physicalTag(t))));
+  const keep = new Set(nearestTrees.map(treeKey));
   for (const [key, entity] of activeEntities.entries()) {
     if (!keep.has(key)) { entity.remove(); activeEntities.delete(key); }
   }
-  // Add only a small number of nearby labels to limit visual clutter.
   for (const item of candidates.slice(0, MAX_LABELS)) {
-    const t = item.t;
-    const key = String(t.tree_id ?? t.record_id ?? physicalTag(t));
+    const t = item.t, key = treeKey(t);
     if (!activeEntities.has(key)) activeEntities.set(key, makeLabel(t, item.d));
+    else updateLabel(activeEntities.get(key), t, item.d);
   }
+
+  $('gpsAccuracy').textContent = currentAccuracy != null
+    ? `Device GPS accuracy: ±${Math.round(currentAccuracy)} m`
+    : 'Device GPS accuracy: waiting';
 
   renderNearbyButtons(nearestTrees);
   if (nearestTrees.length) {
+    // Always prioritise the shortest current distance.
     renderSelected(nearestTrees[0]);
     $('bottomPanel').style.display = 'block';
-    $('statusPill').textContent = `${nearestTrees.length} tree(s) within 10 m`;
+    $('statusPill').textContent = `${nearestTrees.length} nearby · nearest ${distanceTo(nearestTrees[0]).toFixed(1)} m`;
     hideMessage();
   } else {
+    selectedTree = null;
     $('bottomPanel').style.display = 'none';
     $('statusPill').textContent = 'Scanning · 10 m';
     showMessage('No mapped trees are currently estimated within 10 m. Walk closer to a mapped tree and scan again.', false);
   }
 
   if (currentAccuracy > MIN_GPS_ACCURACY_M) {
-    showMessage(`GPS accuracy is approximately ±${Math.round(currentAccuracy)} m. This is wider than the 10 m display range, so nearby-tree detection may be unreliable. Move to an open area and wait for a better fix.`);
+    showMessage(`Device GPS accuracy is ±${Math.round(currentAccuracy)} m. This is wider than the 10 m display radius, so the nearest-tree estimate may be unreliable.`, true);
   }
 }
 
@@ -304,6 +390,7 @@ function startLocationWatch() {
       longitude: position.coords.longitude
     };
     currentAccuracy = position.coords.accuracy || 9999;
+    $('gpsAccuracy').textContent = `Device GPS accuracy: ±${Math.round(currentAccuracy)} m`;
     refreshNearby();
   }, error => {
     showMessage(`Location error: ${error.message}. Check precise location permission and high-accuracy location settings.`);
@@ -315,12 +402,97 @@ function startLocationWatch() {
   });
 }
 
+const compassRad = degrees => degrees * Math.PI / 180;
+const normalizeHeading = degrees => ((degrees % 360) + 360) % 360;
+function circularVariation(values) {
+  if (values.length < 2) return null;
+  const c = values.reduce((sum, value) => sum + Math.cos(compassRad(value)), 0) / values.length;
+  const si = values.reduce((sum, value) => sum + Math.sin(compassRad(value)), 0) / values.length;
+  const resultant = Math.min(1, Math.sqrt(c*c + si*si));
+  return Math.sqrt(Math.max(0, -2 * Math.log(Math.max(resultant, 1e-12)))) * 180 / Math.PI;
+}
+function setCompassStatus(state, detail, color='#d9b65a') {
+  $('compassState').textContent = state;
+  $('compassDetail').textContent = detail;
+  $('compassDot').style.background = color;
+}
+function onCompassOrientation(event) {
+  const alpha = Number.isFinite(event.alpha) ? event.alpha : null;
+  const webkitHeading = Number.isFinite(event.webkitCompassHeading) ? event.webkitCompassHeading : null;
+  // iOS exposes a compass heading directly. On Android, alpha is a browser
+  // orientation estimate; it is useful for fluctuation monitoring, not proof
+  // of absolute magnetic accuracy.
+  const heading = webkitHeading !== null ? normalizeHeading(webkitHeading)
+    : alpha !== null ? normalizeHeading(360 - alpha) : null;
+  if (heading === null) return;
+
+  compassSampleCount++;
+  compassAbsoluteSeen = compassAbsoluteSeen || event.absolute === true || webkitHeading !== null;
+  const now = Date.now();
+  compassSamples.push({time: now, heading});
+  compassSamples = compassSamples.filter(sample => sample.time >= now - 5000).slice(-120);
+  const variation = circularVariation(compassSamples.map(sample => sample.heading));
+
+  if (compassSamples.length < 10 || variation === null) {
+    setCompassStatus('Compass: collecting', `${compassSampleCount} readings · keep phone still for a few seconds`);
+    return;
+  }
+  const variationText = `Recent variation ±${variation.toFixed(1)}°`;
+  if (variation < 5) {
+    setCompassStatus(compassAbsoluteSeen ? 'Compass: stable' : 'Compass: steady, reference unconfirmed',
+      `${variationText}${compassAbsoluteSeen ? ' · absolute heading event seen' : ' · heading may have a fixed offset'}`,
+      compassAbsoluteSeen ? '#65d18b' : '#e3bd58');
+  } else if (variation < 12) {
+    setCompassStatus('Compass: fluctuating', `${variationText} · hold still and move away from metal`, '#e3bd58');
+  } else {
+    setCompassStatus('Compass: unstable', `${variationText} · use compass diagnostics to investigate`, '#ff8b72');
+  }
+}
+async function startCompassMonitor() {
+  stopCompassMonitor();
+  compassSamples = [];
+  compassSampleCount = 0;
+  compassAbsoluteSeen = false;
+  if (!('DeviceOrientationEvent' in window)) {
+    setCompassStatus('Compass: unavailable', 'This browser does not expose orientation sensors. Open diagnostics for details.', '#ff8b72');
+    return;
+  }
+  try {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      const permission = await DeviceOrientationEvent.requestPermission();
+      if (permission !== 'granted') throw new Error('Motion/orientation permission was not granted');
+    }
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', onCompassOrientation, true);
+      compassListener = 'deviceorientationabsolute';
+    } else {
+      window.addEventListener('deviceorientation', onCompassOrientation, true);
+      compassListener = 'deviceorientation';
+    }
+    setCompassStatus('Compass: collecting', `Listening to ${compassListener}; keep phone still for 5 seconds`);
+    window.setTimeout(() => {
+      if (compassListener && compassSampleCount === 0) {
+        setCompassStatus('Compass: no readings', 'Sensor data not received. Open compass diagnostics and check permissions.', '#ff8b72');
+      }
+    }, 6000);
+  } catch (error) {
+    setCompassStatus('Compass: permission needed', `${error.message}. Open compass diagnostics to check access.`, '#ff8b72');
+  }
+}
+function stopCompassMonitor() {
+  if (compassListener) window.removeEventListener(compassListener, onCompassOrientation, true);
+  compassListener = '';
+}
+
 async function startAR() {
   $('startBtn').disabled = true;
   $('startBtn').textContent = 'Preparing AR…';
   try {
     if (!window.isSecureContext) throw new Error('Camera and location require HTTPS. Open this page through the deployed HTTPS site or localhost.');
+    // Start orientation permission/listener directly from the Start button gesture.
+    const compassStartup = startCompassMonitor();
     await loadInventory();
+    await compassStartup;
 
     $('startPanel').style.display = 'none';
     $('exitBtn').style.display = 'block';
@@ -343,6 +515,7 @@ async function startAR() {
 }
 
 function exitAR() {
+  stopCompassMonitor();
   if (watchId !== null) navigator.geolocation.clearWatch(watchId);
   watchId = null;
   clearLabels();
@@ -359,6 +532,7 @@ function exitAR() {
 $('startBtn').addEventListener('click', startAR);
 $('exitBtn').addEventListener('click', exitAR);
 window.addEventListener('pagehide', () => {
+  stopCompassMonitor();
   if (watchId !== null) navigator.geolocation.clearWatch(watchId);
 });
 </script>

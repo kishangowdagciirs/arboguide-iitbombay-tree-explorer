@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#153c2e">
+<title>ArboGuide | Compass Diagnostic</title>
+<style>
+:root{--green:#174c37;--leaf:#2d8055;--mint:#e9f4ed;--ink:#18312a;--muted:#61736a;--line:#dce8df}
+*{box-sizing:border-box}
+body{margin:0;background:#f1f6f2;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+header{background:linear-gradient(135deg,#153c2e,#246447);color:white;padding:20px 17px 24px}
+.wrap{width:min(760px,100%);margin:auto;padding:0 14px}
+.brand{font-size:12px;letter-spacing:1.2px;font-weight:800;opacity:.85}
+h1{font-size:25px;margin:8px 0 6px}
+.sub{font-size:13px;line-height:1.5;color:#d8e9de}
+main{padding:15px 0 34px}
+.card{background:white;border:1px solid var(--line);border-radius:17px;padding:16px;margin:0 0 13px;box-shadow:0 5px 18px #173d2910}
+.card h2{font-size:15px;margin:0 0 12px}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+button,.linkbtn{border:0;border-radius:11px;background:var(--leaf);color:white;font-weight:750;font-size:14px;padding:12px 15px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+button.secondary,.linkbtn.secondary{background:#eaf3ed;color:#24563a;border:1px solid #cfe0d3}
+button:disabled{opacity:.55;cursor:default}
+#permissionStatus{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+.hero{display:grid;grid-template-columns:132px 1fr;gap:16px;align-items:center}
+.dial{width:132px;height:132px;border-radius:50%;border:5px solid #dce9df;background:radial-gradient(circle,#fff 57%,#eff6f0 58%);position:relative;display:grid;place-items:center}
+.dial:before{content:'N';position:absolute;top:7px;font-weight:800;color:#286344;font-size:12px}
+.dial:after{content:'';position:absolute;bottom:7px;width:5px;height:5px;border-radius:50%;background:#9bb7a2}
+#needle{position:absolute;width:4px;height:48px;top:16px;left:calc(50% - 2px);transform-origin:50% 50px;transform:rotate(0deg);transition:transform .12s linear}
+#needle:before{content:'';position:absolute;top:0;left:-5px;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:22px solid #2d8055}
+#needle:after{content:'';position:absolute;top:22px;left:0;width:4px;height:26px;background:#a9b9ae;border-radius:3px}
+#heading{font-size:35px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.unit{font-size:13px;color:var(--muted)}
+#quality{display:inline-block;margin-top:9px;padding:6px 10px;border-radius:30px;background:#edf3ee;color:#52685a;font-size:11px;font-weight:800}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.metric{background:#f5f8f5;border:1px solid #e7eee8;border-radius:12px;padding:11px}
+.metric .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.metric .v{font-size:19px;font-weight:750;margin-top:5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.note{font-size:12px;line-height:1.55;color:#53665b}
+.warn{background:#fff8e8;border:1px solid #efdfb4;color:#70551c;border-radius:12px;padding:11px;font-size:12px;line-height:1.5}
+.good{background:#eaf6ee;border:1px solid #cfe6d5;color:#245b39;border-radius:12px;padding:11px;font-size:12px;line-height:1.5}
+#log{max-height:170px;overflow:auto;background:#14231b;color:#d9eadf;border-radius:10px;padding:10px;font:11px/1.55 monospace;white-space:pre-wrap;word-break:break-word}
+footer{text-align:center;color:#728278;font-size:11px;padding:8px 0 18px}
+@media(max-width:390px){.hero{grid-template-columns:112px 1fr;gap:12px}.dial{width:112px;height:112px}#needle{height:40px;top:14px;transform-origin:50% 42px}#heading{font-size:30px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">ARBOGUIDE · FIELD TOOLS</div><h1>Compass diagnostic</h1><div class="sub">Check your phone's orientation sensor before testing tree-label direction in AR.</div></div></header>
+<main class="wrap">
+  <section class="card">
+    <h2>1. Start sensor test</h2>
+    <div class="actions"><button id="startBtn">Enable compass readings</button><button class="secondary" id="resetBtn" disabled>Reset readings</button></div>
+    <div id="permissionStatus">Tap Enable. If your browser asks for motion/orientation permission, choose Allow. Keep the phone upright in portrait orientation.</div>
+  </section>
+  <section class="card">
+    <h2>2. Live heading</h2>
+    <div class="hero">
+      <div class="dial" aria-label="Compass dial"><div id="needle"></div></div>
+      <div><div id="heading">—°</div><div class="unit">Filtered heading · degrees clockwise from north*</div><div id="quality">Waiting for sensor</div></div>
+    </div>
+    <p class="note">*The Android browser's alpha-derived heading is an estimate from the device-orientation event. Confirm it against a known direction before using it for AR placement.</p>
+  </section>
+  <section class="card">
+    <h2>3. Sensor readings</h2>
+    <div class="metrics">
+      <div class="metric"><div class="k">Raw alpha</div><div class="v" id="alpha">—</div></div>
+      <div class="metric"><div class="k">Raw heading</div><div class="v" id="rawHeading">—</div></div>
+      <div class="metric"><div class="k">Beta · tilt</div><div class="v" id="beta">—</div></div>
+      <div class="metric"><div class="k">Gamma · tilt</div><div class="v" id="gamma">—</div></div>
+      <div class="metric"><div class="k">Absolute event</div><div class="v" id="absolute">—</div></div>
+      <div class="metric"><div class="k">Screen rotation</div><div class="v" id="screenAngle">—</div></div>
+      <div class="metric"><div class="k">Short-term variation</div><div class="v" id="variation">—</div></div>
+      <div class="metric"><div class="k">Samples received</div><div class="v" id="samples">0</div></div>
+    </div>
+  </section>
+  <section class="card">
+    <h2>4. Field test procedure</h2>
+    <ol class="note" style="padding-left:19px">
+      <li>Move away from vehicles, metal fences, magnetic phone mounts and electrical equipment.</li>
+      <li>Hold the phone upright in portrait orientation, with the top edge pointing forward.</li>
+      <li>Stand still for 10 seconds and observe the stability indicator.</li>
+      <li>Slowly rotate one full circle. The heading should change smoothly and return near its starting value.</li>
+      <li>Repeat in a different open location and compare the readings.</li>
+    </ol>
+    <div class="warn">Stability describes how much readings fluctuate over the recent few seconds. A stable reading can still have a constant directional offset; this page cannot certify magnetic calibration or absolute heading accuracy.</div>
+  </section>
+  <section class="card">
+    <h2>5. Sensor diagnostics</h2>
+    <div id="diagnostic" class="warn">No sensor data yet. Start the test to check which browser orientation fields are available.</div>
+    <div style="height:10px"></div><div id="log">Diagnostic log ready.</div>
+  </section>
+  <div class="actions"><a class="linkbtn secondary" href="ar-test.html">← Return to AR test</a><a class="linkbtn secondary" href="index.html">ArboGuide home</a></div>
+</main>
+<footer>ArboGuide diagnostic utility · Does not modify AR sensor controls</footer>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const norm = n => ((n % 360) + 360) % 360;
+let running = false, listenerType = '', sampleCount = 0, filtered = null;
+let recent = [], lastLogAt = 0;
+const rad = d => d * Math.PI / 180;
+function circularBlend(previous, next, weight) {
+  if (previous === null) return next;
+  const a = rad(previous), b = rad(next);
+  const x = (1-weight)*Math.cos(a) + weight*Math.cos(b);
+  const y = (1-weight)*Math.sin(a) + weight*Math.sin(b);
+  return norm(Math.atan2(y,x) * 180 / Math.PI);
+}
+function circularStd(values) {
+  if (values.length < 2) return null;
+  const c = values.reduce((s,v)=>s+Math.cos(rad(v)),0)/values.length;
+  const si = values.reduce((s,v)=>s+Math.sin(rad(v)),0)/values.length;
+  const r = Math.min(1, Math.sqrt(c*c+si*si));
+  return Math.sqrt(Math.max(0,-2*Math.log(Math.max(r,1e-12))))*180/Math.PI;
+}
+function setText(id, value) { $(id).textContent = value; }
+function log(message) {
+  const now = new Date().toLocaleTimeString();
+  const el = $('log'); el.textContent = `[${now}] ${message}\n` + el.textContent;
+}
+function onOrientation(e) {
+  const alpha = Number.isFinite(e.alpha) ? e.alpha : null;
+  const iosHeading = Number.isFinite(e.webkitCompassHeading) ? e.webkitCompassHeading : null;
+  let raw = null, source = '';
+  if (iosHeading !== null) { raw = norm(iosHeading); source = 'webkitCompassHeading'; }
+  else if (alpha !== null) { raw = norm(360-alpha); source = '360 − alpha (experimental)'; }
+
+  setText('alpha', alpha === null ? 'Unavailable' : `${alpha.toFixed(1)}°`);
+  setText('beta', Number.isFinite(e.beta) ? `${e.beta.toFixed(1)}°` : 'Unavailable');
+  setText('gamma', Number.isFinite(e.gamma) ? `${e.gamma.toFixed(1)}°` : 'Unavailable');
+  setText('absolute', String(e.absolute === true));
+  const angle = screen.orientation && Number.isFinite(screen.orientation.angle) ? screen.orientation.angle : (Number.isFinite(window.orientation) ? window.orientation : 0);
+  setText('screenAngle', `${angle}°`);
+  if (raw === null) {
+    setText('rawHeading','Unavailable');
+    setText('diagnostic','Orientation event received, but no usable alpha or compass-heading value was provided.');
+    return;
+  }
+  sampleCount++;
+  filtered = circularBlend(filtered, raw, 0.18);
+  recent.push({t:Date.now(),h:raw});
+  const cutoff = Date.now()-5000;
+  recent = recent.filter(x=>x.t>=cutoff).slice(-100);
+  const variation = circularStd(recent.map(x=>x.h));
+  setText('rawHeading',`${raw.toFixed(1)}°`);
+  setText('heading',`${filtered.toFixed(1)}°`);
+  $('needle').style.transform = `rotate(${filtered}deg)`;
+  setText('variation',variation === null ? 'Collecting…' : `±${variation.toFixed(1)}°`);
+  setText('samples',String(sampleCount));
+
+  let quality = 'Collecting samples', cls = 'warn';
+  if (recent.length >= 10 && variation !== null) {
+    if (variation < 5) { quality='Stable · low variation'; cls='good'; }
+    else if (variation < 12) { quality='Moderate variation'; cls='warn'; }
+    else { quality='Unstable · high variation'; cls='warn'; }
+  }
+  $('quality').textContent = quality;
+  $('quality').style.background = cls==='good' ? '#eaf6ee' : '#fff3dc';
+  $('quality').style.color = cls==='good' ? '#245b39' : '#70551c';
+  $('diagnostic').className = cls;
+  $('diagnostic').textContent = `Reading source: ${source}. Event absolute flag: ${e.absolute === true ? 'true' : 'false'}. ${e.absolute === true ? 'The browser marks this event as absolute, but this does not guarantee a calibrated compass.' : 'The browser has not confirmed an absolute orientation reference; treat the heading as provisional.'} Short-term variation: ${variation === null ? 'collecting samples' : `${variation.toFixed(1)}°`}.`;
+  if (Date.now()-lastLogAt>2500) { log(`source=${source}; alpha=${alpha===null?'n/a':alpha.toFixed(1)}; raw=${raw.toFixed(1)}; filtered=${filtered.toFixed(1)}; absolute=${e.absolute===true}`); lastLogAt=Date.now(); }
+}
+async function start() {
+  if (running) return;
+  try {
+    if (!('DeviceOrientationEvent' in window)) throw new Error('This browser does not expose DeviceOrientationEvent. Try the latest Chrome on Android.');
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      const permission = await DeviceOrientationEvent.requestPermission();
+      if (permission !== 'granted') throw new Error('Motion/orientation permission was not granted.');
+    }
+    // Prefer the absolute event where supported; fall back to the standard event.
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', onOrientation, true);
+      listenerType = 'deviceorientationabsolute';
+    } else {
+      window.addEventListener('deviceorientation', onOrientation, true);
+      listenerType = 'deviceorientation';
+    }
+    running = true;
+    $('startBtn').disabled = true;
+    $('resetBtn').disabled = false;
+    setText('permissionStatus',`Listening for ${listenerType}. Hold the phone upright and rotate slowly.`);
+    log(`Listening for ${listenerType}.`);
+  } catch (err) {
+    setText('permissionStatus',err.message || String(err));
+    log(`Start error: ${err.message || err}`);
+  }
+}
+function reset() {
+  filtered = null; recent = []; sampleCount = 0;
+  setText('heading','—°'); setText('rawHeading','—'); setText('variation','—'); setText('samples','0');
+  $('needle').style.transform='rotate(0deg)';
+  setText('quality','Collecting samples');
+  setText('diagnostic','Filter and stability window reset. Keep the phone still for several seconds.');
+  log('Filter and sample window reset. Sensor listener remains active.');
+}
+function stop() {
+  if (listenerType) window.removeEventListener(listenerType,onOrientation,true);
+  running=false; listenerType='';
+  $('startBtn').disabled=false; $('resetBtn').disabled=true;
+}
+$('startBtn').addEventListener('click',start);
+$('resetBtn').addEventListener('click',reset);
+window.addEventListener('pagehide',stop);
+if (!window.isSecureContext) {
+  setText('permissionStatus','This page needs HTTPS or localhost for sensor access.');
+}
+</script>
+</body>
+</html>
